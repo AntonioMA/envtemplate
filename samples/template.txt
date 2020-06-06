@@ -1,0 +1,101 @@
+This is a sample template file.
+Variable: {[.TESTVAR]}
+{[range $index, $elem := .TESTVAR.Split "," -]}
+  Index: {[$index]}
+  Elem: {[$elem]}{[end]}
+{[range $index, $elem := .TESTVAR_SPC.Split " " -]}
+-  Index: {[$index]}
+-  Elem: {[$elem]}
+{[end -]}
+
+{[if false]}
+ Vault Templates will be populated from all the variables that have `VAULT_SECRET_\d+` as a name
+ pattern. The value of the variables is expected to be `Path;Key;Destination`. For example
+ `VAULT_SECRET_1="secret/this/is/a/path;whatever;secret/some/path.json`
+{[end -]}
+{[range $index, $vt := .Filter "^VAULT_SECRET_\\d+$" -]}
+    {[$parts := $vt.Split ";" -]}
+    {[$path := index $parts 0 -]}
+    {[$key := index $parts 1 -]}
+    {[$destination := index $parts 2]}
+      template {
+        data = "{{with secret \"{[$path]}\"}}{{print .Data.{[$key]}}}{{end}}"
+        change_mode = "restart"
+        destination = "{[$destination]}"
+      }
+{[end -]}
+
+{[if and .TESTVAR .TESTVAR_2]}
+On the then
+{[else]}
+on the else
+{[end]}
+
+{[if and .TESTVAR .USE_INGRESS]}
+On the then 2
+{[else]}
+on the else 2
+{[end]}
+
+{[if false]}
+  Consul Templates will be populated from all the variables that have `CONSUL_KV_\d+` as a name
+  pattern. The value of the variables is expected to be `Path;Destination`. For example,
+  `CONSUL_KV_1="config/whatever;config/config.json`
+{[end -]}
+{[range $ct := .Filter "^CONSUL_KV_\\d+$" -]}
+  {[$parts := $ct.Split ";" -]}
+  {[$path := index $parts 0 -]}
+  {[$destination := index $parts 1]}
+      template {
+        data = "{{key \"{[$path]}\"}}"
+        change_mode = "restart"
+        destination = "{[$destination]}"
+      }
+ {[end -]}
+
+{[if false]}
+ Environment templates will be populated as follows:
+  * The VAULT_ENV_FILE environment variable will be used as the destination file for the env config file
+  * Vault Templates will be generated for all the variables that have `^VAULT_ENVSECRET_\d+$` as a
+    name pattern. The value of the variables is expected to be as defined for Vault Templates above
+    (that is "vault path;vault key;destination variable").
+{[end -]}
+{[if .VAULT_ENV_FILE]}
+      template {
+        data = <<EOH
+        {[- range $vt := .Filter "^VAULT_ENVSECRET_\\d+$"]}
+            {[$parts := $vt.Split ";" -]}
+            {[$path := index $parts 0 -]}
+            {[$key := index $parts 1 -]}
+            {[$destination := index $parts 2 -]}
+            {[$destination]}="{{with secret "{[$path]}"}}{{.Data.{[$key]}}}{{end}}"{[end]}
+EOH
+        destination = "{[.VAULT_ENV_FILE]}"
+        env         = true
+      }
+{[end]}
+
+We can also load a file:
+{[.FILE.LoadFile]}
+
+And possibly convert it to JSON
+"{[js .FILE.LoadFile]}"
+
+A second, better way:
+{[.FILE.LoadFile.ToJSON]}
+
+So we can generate JSONs easily as for example...
+{
+{[- $sep := ""]}
+{[- range $filename := .Filter "^FILE_\\d"]}
+  {[- $sep]}
+  {[$filename.ToJSON]}: {[$filename.LoadFile.ToJSON]}
+  {[- $sep = ","]}
+{[- end]}
+}
+
+We can also load them from relative directories
+{[(.FILE.LoadRelativeFileES .CONFIG_DIR).ToJSON]}
+
+And of course we can also convert them to Base64
+{[(.FILE.LoadRelativeFileES .CONFIG_DIR).ToBase64]}

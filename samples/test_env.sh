@@ -1,0 +1,14 @@
+export GOPRIVATE=github.com/AntonioMA/go-utils
+export TESTVAR_SPC="them are %fight_ti_ng% words"
+export CONSUL_KV_1="config/whatever;config/config.json"
+export CONSUL_KV_2="config/whatever2;config/config2.json"
+export VAULT_ENVSECRET_2="secret/core/services/sentinel/password\;redisValue\;REDIS_PASS2"
+export VAULT_ENVSECRET_2="secret/core/services/sentinel/password\;redisValue\;REDIS_PASS2"
+export FILE=./samples/cert.pem
+export FILE_1=./samples/cert.pem
+export FILE_3=./samples/sample.json
+export CWD=.
+export CONFIG_DIR=.
+export TESTVAR=v1,v2,v3.v4,v5
+export USE_INGRESS=1
+export 'fight_ti_ng'=FIGHTING

@@ -2,7 +2,7 @@ package lib
 
 import (
 	"fmt"
-	"github.com/AntonioMA/go-utils/template"
+	"envtemplate/template"
 	"os"
 	"regexp"
 )

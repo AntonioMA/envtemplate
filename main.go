@@ -2,16 +2,18 @@ package main
 
 import (
 	"envtemplate/lib"
+	templateUtils "envtemplate/template"
+	"envtemplate/utils"
 	"flag"
 	"fmt"
-	templateUtils "github.com/AntonioMA/go-utils/template"
-	"github.com/AntonioMA/go-utils/utils"
 	"io"
 	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
 	"text/template"
+
+	"github.com/Masterminds/sprig/v3"
 )
 
 type commandlineFlags struct {
@@ -48,7 +50,7 @@ func checkOptions(cf commandlineFlags) (writer io.Writer, tmplt *template.Templa
 		New("root").
 		Delims("{[", "]}").
 		Option("missingkey=zero")
-	if tmplt, err = tmplt.Parse(string(tmplData)); err != nil {
+	if tmplt, err = tmplt.Funcs(sprig.FuncMap()).Parse(string(tmplData)); err != nil {
 		err = fmt.Errorf("error parsing template: %v\n", err)
 		return
 	}

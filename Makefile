@@ -1,5 +1,6 @@
 GO ?= go
 CONFIG_DIR ?= undef
+TARGET_DIR=$(CURDIR)
 
 # Platforms to build for. You can add or remove platforms here
 # Note that at this time, Linux build does not work outside of linux...
@@ -17,8 +18,6 @@ BUILD_DIR_LINK = $(shell readlink $(BUILD_DIR))
 
 VET_REPORT := vet.report
 TEST_REPORT := tests.xml
-
-GOPRIVATE=github.com/AntonioMA/go-utils
 
 GOARCH := amd64
 
@@ -66,6 +65,11 @@ clean:
 	-rm -f ${TEST_REPORT}
 	-rm -f ${VET_REPORT}
 	-rm -rf $(OUTPUT_BASE_DIR)
+
+test:
+	rm -rf $(TARGET_DIR)/report && mkdir -p $(TARGET_DIR)/report
+	GO111MODULE=on GOPRIVATE=$(GOPRIVATE) $(GO) test -p=1 -count=1 ./... -v -timeout 60s -short -cover -covermode=atomic -coverprofile=$(TARGET_DIR)/report/coverage.out && \
+    $(GO) tool cover -html=$(TARGET_DIR)/report/coverage.out -o $(TARGET_DIR)/report/coverage.html
 
 .PHONY: all link $(PLATFORMS) test vet fmt clean showconfig $(DEPLOY_TARGETS)
 
